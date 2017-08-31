@@ -1,0 +1,17 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "chartherpharmacy",
+    "database": "hellobooks",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "SECRET_KEY" : "dndsjndfbnscjdskjdskjdsnjksdkjdskjdsjk"  
+  },
+  "test": {
+    "username": "postgres",
+    "password": "chartherpharmacy",
+    "database": "hellobooks",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
