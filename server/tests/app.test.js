@@ -135,6 +135,36 @@ describe('Testing All Models', function () {
     });
   })
 
-  describe('Book Model', )
+  describe('Book Model', function() {
+    it('it should create a new book ', (done) =>{
+      Book.create({
+        title: "Oluwapelumi",
+        year: 1945,
+        author: "Philip",
+        count: 2
+      })
+      .then(book => {
+        expect(book.title).toBeA('string');
+        expect(book.year).toBeA('number');
+        expect(book.author).toBeA('string');
+        expect(book.count).toBeA('number');
+        expect(book).toExist();
+        done();
+      }).catch((err) => done(err));
+    });
+
+    it('it should check if the new book is an instance of the book model ', (done) =>{
+      Book.create({
+        title: "Oluwapelumi2",
+        year: 1943,
+        author: "Philipo",
+        count: 3
+      })
+      .then(book => {        
+        expect(book instanceof Book).toBe(true);
+        done();
+      }).catch((err) => done(err));
+    });
+  })
 })
 
