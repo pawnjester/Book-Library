@@ -22,9 +22,7 @@ module.exports = (app) => {
   app.get('/api/users/:userId/books', authenticate,checkIfUserExists, bookController.getUserBooksBorrowedNotReturned);    
   app.post('/api/users/:userId/books', checkIfUserExists, authenticate, CheckBookCount,CheckIfBookIsAlreadyBorrowed, 
   bookController.BorrowBooks); 
-  app.put('/api/users/:userId/books', checkIfUserExists, authenticate,bookController.returnBooks); 
-  
-   
+  app.put('/api/users/:userId/books', checkIfUserExists, authenticate,bookController.returnBooks);   
    
   
 }

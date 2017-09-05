@@ -3,45 +3,44 @@ const {User} =  require('../models');
 
 module.exports = {
   signup(req, res) {
-    const username = req.body.username.toLowerCase().trim();
-    const email = req.body.email.trim();
+    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
 
-    if(!username ) {
-      return res.status(500).send({error: "You need to fill in your username"}) 
+    if(!username) {
+      return res.status(400).send({error: "You need to fill in your username"}) 
     }else if(!email) {
-      return res.status(500).send({error:"You need to fill in your email"})
+      return res.status(400).send({error:"You need to fill in your email"})
     }else if(!password) {
-      return res.status(500).send({error: "You need to fill in your password"})
+      return res.status(400).send({error: "You need to fill in your password"})
     }
 
-    User.findOne({
+    return User.findOne({
       where: {
         username,
       }
     })
     .then (user => {
       if(user) {
-        return res.status(400).send({message: 'Username must be unique'})
+        return res.status(400).send({message: 'Username already taken'})
       }
-
-      User.create({
+      return User.create({
       username,
-      email, 
+      email,
       password,
       isAdmin: req.body.isAdmin,
-    })
-    .then((user) => {
-      // req.session.user = user;
-      const token = user.generateAuthToken();
-      res.header('x-auth', token).status(201).send({
-      message: `Welcome ${user.username}`,
-      user
-    });      
-    })
-    .catch((error) => { return res.status(400).send(`${error.errors[0].message}`)})     
-
-    })
+      })
+      .then((user) =>
+       {      
+        const token = user.generateAuthToken();
+        return res.header('x-auth', token).status(201)
+        .send({
+          message: `Welcome ${user.username}`,
+          user
+        });      
+      })
+    .catch((error) => { return res.status(400).send(`${error.errors[0].message}`)})  
+  })  
   },
  
 
@@ -108,7 +107,7 @@ module.exports = {
         res.clearCookie('user_sid'); 
         return res.status(200).send({message: "User has logged out"});       
     } else {
-        return res.status(500).send({message: "You need to log in first"});
+        return res.status(400).send({message: "You need to log in first"});
     }    
   }
 }
