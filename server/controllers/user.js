@@ -22,7 +22,7 @@ module.exports = {
     })
     .then (user => {
       if(user) {
-        return res.status(400).send({message: 'Username already taken'})
+        return res.status(400).send({error: 'Username already taken'})
       }
       return User.create({
       username,
@@ -51,22 +51,21 @@ module.exports = {
 
     if(!username) {
       return res.status(401)
-      .send(
-        {status: false, 
-          message: "Username cannot be empty"
+      .send({
+        status: false, 
+        error: "Username cannot be empty"
         });
     } 
     else if (!req.body.password) {
       return res.status(401)
-      .send(
-        {status: false,
-           message: "Password field cannot be empty"
+      .send({
+        status: false,
+        error: "Password field cannot be empty"
         });
     }
     User.findOne({
       where: {
         username,
-        // isAdmin: req.body.isAdmin
       }
     })
     .then((user) =>{     
@@ -74,20 +73,20 @@ module.exports = {
       if(!user) {
         return res.status(401).send({message: "User is not registered"})
       }
-      if(!user.validPassword(req.body.password)){
+      else if(!user.validPassword(req.body.password)){
         return res.status(401)
         .send({
           message: "The password is incorrect"
         })
       }
+            
       const token = user.generateAuthToken();
       res.header('x-auth', token).status(200).send({
       statusCode: 200,
       message: `Welcome back, ${user.username}`,
       user
-    });      
-      // res.status(200).send({statusCode: 200, user});
-
+    });
+      
     })
     .catch(error => {return res.status(400).send(error)})
   },

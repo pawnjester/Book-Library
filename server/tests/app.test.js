@@ -1,5 +1,3 @@
-// const chai = require('chai'); 
-// const expect = chai.expect;
 const expect = require('expect');
 const request = require('supertest');
 const {User, Book, Borrower} = require('./../models');
@@ -38,9 +36,9 @@ const beforeany = () => {
 //   });
 
 describe('Testing All Models', function () {
-  beforeany();
+  // beforeany(); 
   describe("User Model", function() {
-    it('It should create a new user', function(done) {   
+    it('It should create a new user instance', function(done) {   
 
     User.create({
       username: 'chair',
@@ -136,7 +134,7 @@ describe('Testing All Models', function () {
   })
 
   describe('Book Model', function() {
-    it('it should create a new book ', (done) =>{
+    it('it should create a new book instance ', (done) =>{
       Book.create({
         title: "Oluwapelumi",
         year: 1945,
@@ -148,6 +146,8 @@ describe('Testing All Models', function () {
         expect(book.year).toBeA('number');
         expect(book.author).toBeA('string');
         expect(book.count).toBeA('number');
+        expect(book.count).toBe(2);
+        
         expect(book).toExist();
         done();
       }).catch((err) => done(err));
@@ -165,6 +165,140 @@ describe('Testing All Models', function () {
         done();
       }).catch((err) => done(err));
     });
-  })
-})
+  });
+});
+
+describe('Testing API routes', () => {
+  beforeany();
+  describe('POST /api/users/*', () => {    
+
+    it('it should signup a new user', (done) => {
+      request(app)
+      .post('/api/users/signup')
+      .send({
+        username: "Charles2",
+        email: "charles@example.com",
+        password: "chartherpharmacy2",
+        isAdmin: true,
+      })
+      .expect(201)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        
+        expect(res.body.user.id).toExist();
+        expect(res.body.user.username).toBe('Charles2');
+        expect(res.body.user.email).toBe('charles@example.com');
+        expect(res.body.user.isAdmin).toBe(true);   
+        expect(res.header['x-auth']).toExist();             
+        done()
+      });
+    });
+
+    it('it should not signup a new user with invalid username', (done) => {
+      request(app)
+      .post('/api/users/signup')
+      .send({
+        username: "",
+        email: "charles2@example.com",
+        password: "chartherpharmacy",
+        isAdmin: true
+      })
+      .expect(400)
+      .end((err, res) => {
+        if(err) {
+          return done(err);
+        }
+        expect(res.body.username).toNotExist();
+        expect(res.body.id).toNotExist();
+        expect(res.body.error).toBe("You need to fill in your username"); 
+        expect(res.header['x-auth']).toNotExist();   
+        
+        done()
+      });
+    });
+
+    it('it should not create a user twice', (done) =>{
+      request(app)
+      .post('/api/users/signup')
+      .send({
+        username: "Charles2",
+        email: "charles@example.com",
+        password: "chartherpharmacy2",
+        isAdmin: true,
+      })
+      .expect(400)
+      .end((err, res) => {
+        if(err) {
+          return done(err);
+        }
+        expect(res.body.id).toNotExist()
+        expect(res.body.username).toNotExist();
+        expect(res.body.error).toBe("Username already taken")      
+        done()
+      })
+    });
+
+    it('it should signin a new user with no username', (done) => {
+      request(app)
+      .post('/api/users/signin')
+      .send({
+        username: "",        
+        password: "chartherpharmacy2",               
+      })
+      // .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }  
+        // console.log(err)      
+        expect(res.statusCode).toBe(401);        
+        expect(res.body.error).toBe("Username cannot be empty"); 
+        expect(res.header['x-auth']).toNotExist();               
+        done()
+      });
+    });
+
+    it('it should signin a new user with no password', (done) => {
+      request(app)
+      .post('/api/users/signin')
+      .send({
+        username: "Charles2",        
+        password: "",               
+      })
+      
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }  
+        // console.log(err)      
+        expect(res.statusCode).toBe(401);        
+        expect(res.body.error).toBe("Password field cannot be empty"); 
+        expect(res.header['x-auth']).toNotExist();               
+        done()
+      });
+    });
+    
+    it('it should signin a new user ', (done) => {
+      request(app)
+      .post('/api/users/signin')
+      .send({
+        username: "Charles2",        
+        password: "chartherpharmacy2",               
+      })
+      
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }              
+        expect(res.statusCode).toBe(201);        
+        // expect(res.body.error).toBe("Password field cannot be empty"); 
+        expect(res.header['x-auth']).toExist();               
+        done()
+      });
+    });
+
+  });
+});
 
